@@ -1,0 +1,22 @@
+[
+  {
+    "before": "TAG: \"{{BEFORE-VERSION}}\"",
+    "after": "TAG: \"{{AUTO-VERSION}}\"",
+    "files": [
+      "./ci/develop/buildspec_docker.yml",
+      "./ci/rc/buildspec_docker.yml",
+      "./ci/staging/buildspec_docker.yml",
+      "./ci/production/buildspec_docker.yml",
+      "./ci/production_sts/buildspec_docker.yml"
+    ]
+  },
+  {
+    "before": "appVersion: \"{{BEFORE-VERSION}}\"",
+    "after": "appVersion: \"{{AUTO-VERSION}}\"",
+    "files": [
+      "./ci/helm/Chart.yaml",
+      "./ci/helm_sts/Chart.yaml"
+    ]
+  }
+]
+

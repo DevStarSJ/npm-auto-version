@@ -23,7 +23,7 @@ function getPackageVersion() {
         throw new Error('Invalid version number found in package.json, please make sure it is valid');
     }
 
-    return [semver.major(version), semver.minor(version)].join('.');
+    return [semver.major(version), semver.minor(version), semver.patch(version)].join('.');
 }
 
 /**
@@ -68,6 +68,26 @@ function writePackageVersion(newVersion) {
     fs.writeFileSync(packageJson, JSON.stringify(raw, null, 2));
 }
 
+function writeOtherFiles(newVersion) {
+    let rows
+    const settingJson = path.join(process.cwd(), 'autoVersion.json')
+    try {
+        rows = require(settingJson);
+    } catch (unused) {
+        return;
+    }
+    rows.forEach(row => {
+        const beforeText = row.before.replace('{{BEFORE-VERSION}}', '\\d+.\\d+.\\d+');
+        const afterText = rows[0].after.replace('{{AUTO-VERSION}}', newVersion);
+        const regex = new RegExp(beforeText);
+        rows.files.forEach(file => {
+            const fileContent = fs.readFileSync(file, 'utf-8');
+            const newFileContent = fileContent.replace(regex, afterText);
+            fs.writeFileSync(file, newFileContent);
+        })
+    });
+}
+
 /**
  * Generates the next unused version number based on Git tags
  * @method npm-auto-version
@@ -87,6 +107,7 @@ module.exports = function () {
     }
     // Update the package.json version field with `M.N.P`
     writePackageVersion(newVersion);
+    writeOtherFiles(newVersion);
     // Generate a new git tag in the NPM syntax: `vM.N.P`
     exec('git tag v' + newVersion);
 };
